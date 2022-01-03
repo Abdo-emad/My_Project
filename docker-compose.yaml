@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  # Database
+  db:
+    image: mysql:5.7
+
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 
+      MYSQL_DATABASE: test
+      MYSQL_HOST: localhost
+      MYSQL_PASSWORD: 
+    networks:
+      - wpsite
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8080:80
+    networks:
+      - wpsite
+
+  # App
+  app:
+    depends_on:
+      - db      
+    build: .
+    ports:
+      - '3000:3000'
+    restart: on-failure
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: root
+      MYSQL_HOST: localhost
+    networks:
+      - wpsite
+networks:
+  wpsite:
